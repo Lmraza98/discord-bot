@@ -1,0 +1,20 @@
+{
+  "type": "module",
+  "name": "spotify-discord-bot",
+  "version": "1.0.0",
+  "description": "A bot that controls spotify through a discord channel",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "auth": "node authenticate-spotify.js"
+  },
+  "author": "Lucas R",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.3",
+    "open": "^10.0.3",
+    "spotify-web-api-node": "^5.0.2"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  country: 'US',
+  display_name: 'Lucas Raza',
+  email: 'lmraza98@gmail.com',
+  explicit_content: { filter_enabled: false, filter_locked: false },
+  external_urls: { spotify: 'https://open.spotify.com/user/12147688076' },
+  followers: { href: null, total: 9 },
+  href: 'https://api.spotify.com/v1/users/12147688076',
+  id: '12147688076',
+  images: [
+    {
+      height: 300,
+      url: 'https://scontent-mia3-1.xx.fbcdn.net/v/t39.30808-1/334950974_139362015719024_5502898756833727347_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_cat=101&ccb=1-7&_nc_sid=79bf43&_nc_ohc=E4lLETe-2SIQ7kNvgH7LtXi&_nc_oc=AdgU2urtLE_NxhQqJ0fLS8KJ5JF8Qy5jgAsMSvE7_HhxErsIgX1O0YGaAi-GIfQkrKw&_nc_zt=24&_nc_ht=scontent-mia3-1.xx&edm=AP4hL3IEAAAA&_nc_gid=A7Wnm1m7qEp_ZfUr63_M2AJ&oh=00_AYBWM6lNvAZXyi8rbwPDTojeB70AcISxVmfsQe2JJeRuXA&oe=67C70CED',
+      width: 300
+    },
+    {
+      height: 64,
+      url: 'https://scontent-mia3-1.xx.fbcdn.net/v/t39.30808-1/334950974_139362015719024_5502898756833727347_n.jpg?stp=cp0_dst-jpg_s50x50_tt6&_nc_cat=101&ccb=1-7&_nc_sid=fe756c&_nc_ohc=E4lLETe-2SIQ7kNvgH7LtXi&_nc_oc=AdgU2urtLE_NxhQqJ0fLS8KJ5JF8Qy5jgAsMSvE7_HhxErsIgX1O0YGaAi-GIfQkrKw&_nc_zt=24&_nc_ht=scontent-mia3-1.xx&edm=AP4hL3IEAAAA&_nc_gid=A7Wnm1m7qEp_ZfUr63_M2AJ&oh=00_AYAsp-UoVyf0hmgLPsOjc6uyQL92BMeJYcoRXXuB7jyjSw&oe=67C70CED',
+      width: 64
+    }
+  ],
+  product: 'premium',
+  type: 'user',
+  uri: 'spotify:user:12147688076'
+}
