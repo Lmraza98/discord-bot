@@ -4,3 +4,7 @@ node_modules/
 # Ignore any .env files
 .env
 
+config.json
+
+spotify_credentials.json
+spotify-callback-response.txt
