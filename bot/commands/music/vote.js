@@ -32,7 +32,7 @@ export default {
 
 				await interaction.reply({
 					content: `Voted for "${song.title}"! It now has ${song.votes} votes and is at position ${newPosition}.`,
-					ephemeral: false,
+					ephemeral: true,
 				});
 			}
 			else {

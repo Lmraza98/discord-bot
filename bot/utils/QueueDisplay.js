@@ -37,6 +37,9 @@ export class QueueDisplay {
 			console.error('Error cleaning up old message:', error);
 		}
 
+		// Sync with Active Stream Playlist if queue is empty
+		await this.syncQueueWithActivePlaylist();
+
 		// Create new queue message
 		const embed = this.createQueueEmbed();
 		try {
@@ -180,18 +183,40 @@ export class QueueDisplay {
 		if (!queueMessage) return;
 
 		try {
-			// We no longer remove songs from playlists here
-			// This is now handled by the spotifyTrackChanged event in bot.js
+			console.log('Song finished, handling queue updates');
 
 			// Remove the song from the queue
 			const removedSong = songQueue.removeFirst();
 
+			if (removedSong) {
+				console.log(`Removed song "${removedSong.title}" from queue`);
+
+				// If the song has a Spotify URL, extract the track ID and handle removal
+				if (removedSong.url && removedSong.url.includes('spotify.com/track/')) {
+					const trackId = removedSong.url.split('/').pop().split('?')[0];
+					if (trackId) {
+						try {
+							await spotifyManager.handleTrackRemoval(trackId, removedSong.title);
+							console.log(`Handled Spotify track removal for "${removedSong.title}" (${trackId})`);
+						}
+						catch (error) {
+							console.error(`Error handling Spotify track removal: ${error.message}`);
+						}
+					}
+				}
+			}
+
 			// Set the next song as currently playing
 			if (songQueue.getQueue().length > 0) {
 				currentlyPlayingSong = songQueue.getQueue()[0];
+				console.log(`Next song in queue: "${currentlyPlayingSong.title}"`);
 			}
 			else {
 				currentlyPlayingSong = null;
+				console.log('Queue is now empty');
+
+				// If the queue is now empty, sync with Active Stream Playlist
+				await this.syncQueueWithActivePlaylist();
 			}
 
 			// Update the display
@@ -346,6 +371,113 @@ export class QueueDisplay {
 		}
 		catch (error) {
 			console.error('Error syncing with Spotify:', error);
+		}
+	}
+
+	static async syncQueueWithActivePlaylist() {
+		try {
+			const queue = songQueue.getQueue();
+
+			// Only sync if the queue is empty
+			if (queue.length === 0) {
+				console.log('Queue is empty, syncing with Active Stream Playlist');
+
+				// Get tracks from the Active Stream Playlist
+				const activePlaylist = await spotifyManager.getActivePlaylist();
+				const activeTracks = await spotifyManager.getPlaylistTracks(activePlaylist.id);
+
+				if (activeTracks.body.items.length > 0) {
+					console.log(`Found ${activeTracks.body.items.length} tracks in Active Stream Playlist`);
+
+					// Clear the existing queue first to avoid duplicates
+					songQueue.songs = [];
+
+					// Add each track to the queue
+					for (const item of activeTracks.body.items) {
+						if (item.track) {
+							const trackTitle = `${item.track.name} - ${item.track.artists[0].name}`;
+							const trackUrl = item.track.external_urls.spotify;
+
+							// Use the bot's client ID as the addedBy since these are system-added
+							const botUserId = client.user.id;
+
+							// Add to queue
+							songQueue.addSong(trackTitle, trackUrl, botUserId);
+							console.log(`Added "${trackTitle}" to queue from Active Stream Playlist`);
+						}
+					}
+
+					// Set the first song as currently playing
+					if (songQueue.getQueue().length > 0) {
+						currentlyPlayingSong = songQueue.getQueue()[0];
+						console.log(`Set currently playing song to "${currentlyPlayingSong.title}"`);
+					}
+
+					console.log('Successfully synced queue with Active Stream Playlist');
+					return true;
+				}
+				else {
+					console.log('Active Stream Playlist is empty, checking New Playlist');
+
+					// If Active Stream Playlist is empty, try to get songs from New Playlist
+					try {
+						const playlists = await spotifyManager.spotifyApi.getUserPlaylists();
+						const newPlaylist = playlists.body.items.find(
+							playlist => playlist.name === 'New Playlist',
+						);
+
+						if (newPlaylist) {
+							// Ensure New Playlist has 5 songs
+							await spotifyManager.ensureNewPlaylistHasFiveSongs();
+
+							// Get tracks from the New Playlist
+							const newPlaylistTracks = await spotifyManager.getPlaylistTracks(newPlaylist.id);
+
+							if (newPlaylistTracks.body.items.length > 0) {
+								console.log(`Found ${newPlaylistTracks.body.items.length} tracks in New Playlist`);
+
+								// Add each track to the queue
+								for (const item of newPlaylistTracks.body.items) {
+									if (item.track) {
+										const trackTitle = `${item.track.name} - ${item.track.artists[0].name}`;
+										const trackUrl = item.track.external_urls.spotify;
+
+										// Use the bot's client ID as the addedBy
+										const botUserId = client.user.id;
+
+										// Add to queue
+										songQueue.addSong(trackTitle, trackUrl, botUserId);
+										console.log(`Added "${trackTitle}" to queue from New Playlist`);
+									}
+								}
+
+								// Set the first song as currently playing
+								if (songQueue.getQueue().length > 0) {
+									currentlyPlayingSong = songQueue.getQueue()[0];
+									console.log(`Set currently playing song to "${currentlyPlayingSong.title}"`);
+								}
+
+								console.log('Successfully synced queue with New Playlist');
+								return true;
+							}
+						}
+					}
+					catch (error) {
+						console.error('Error syncing with New Playlist:', error);
+					}
+
+					console.log('Both playlists are empty, nothing to sync');
+				}
+			}
+			else {
+				console.log('Queue is not empty, skipping sync with Active Stream Playlist');
+			}
+
+			return false;
+		}
+		catch (error) {
+			console.error('Error syncing queue with Active Stream Playlist:', error);
+			return false;
 		}
 	}
 }

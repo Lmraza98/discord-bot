@@ -27,6 +27,6 @@ export default {
 			)
 			.setFooter({ text: 'Use /vote <position> to vote for a song!' });
 
-		await interaction.reply({ embeds: [embed] });
+		await interaction.reply({ embeds: [embed], ephemeral: true });
 	},
 };
